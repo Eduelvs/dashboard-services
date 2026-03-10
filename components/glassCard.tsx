@@ -31,7 +31,7 @@ interface GlassCardProps {
   status: string;
   top: number;
   left: number;
-  uptime: number;
+  uptime: number | string;
   latency: number;
   lastUpdated: string;
   history: Record<string, number>;
