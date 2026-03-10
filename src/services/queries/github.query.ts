@@ -5,6 +5,6 @@ export function useGithubStatusQuery() {
   return useQuery({
     queryKey: ["github-status"],
     queryFn: getGithubStatus,
-    refetchInterval: 60000
+    refetchInterval: 1000
   })
 }
