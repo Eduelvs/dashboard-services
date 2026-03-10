@@ -14,7 +14,6 @@ import React, { Fragment, useEffect, useRef, useState } from "react";
 import { Line } from "react-chartjs-2";
 import { formatDate } from "../src/utils";
 
-import { FaGithub } from "react-icons/fa";
 
 ChartJS.register(
   CategoryScale,
@@ -30,15 +29,19 @@ ChartJS.register(
 interface GlassCardProps {
   name: string;
   status: string;
+  top: number;
+  left: number;
   uptime: number;
   latency: number;
   lastUpdated: string;
   history: Record<string, number>;
   className?: string;
   mouseContainerRef?: React.RefObject<HTMLDivElement | null>;
+  icon: React.ReactNode;
 }
 
-function GlassCard({ name, status, uptime, latency, lastUpdated, history, className, mouseContainerRef }: GlassCardProps) {
+
+function GlassCard({ name, status, top, left, uptime, latency, lastUpdated, history, className, mouseContainerRef, icon }: GlassCardProps) {
   const ownRef = useRef<HTMLDivElement>(null);
   const containerRef = mouseContainerRef ?? ownRef;
   const [ready, setReady] = useState(false);
@@ -68,14 +71,14 @@ function GlassCard({ name, status, uptime, latency, lastUpdated, history, classN
       borderRadius={24}
       style={{
         position: "fixed",
-        top: "50%",
-        left: "50%",
+        top: `${top}%`,
+        left: `${left}%`,
       }}
     >
       <div className="w-72 text-shadow-lg p-2">
         <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2 h-full">
-                <FaGithub size={24} />
+                {icon}
                 <h3 className="text-xl font-semibold flex items-center justify-center">{name}</h3>
             </div>
             <div className="flex items-center space-x-3">

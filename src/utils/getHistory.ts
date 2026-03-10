@@ -7,7 +7,6 @@ export function updateHistory(service: string, value: number) {
 
   history.push(value)
 
-  // mantém só os últimos 30 registros
   if (history.length > 30) history.shift()
 
   localStorage.setItem(key, JSON.stringify(history))

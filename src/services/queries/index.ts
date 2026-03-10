@@ -1,1 +1,1 @@
-export * from "./github.query"
+export * from "./github.query";
