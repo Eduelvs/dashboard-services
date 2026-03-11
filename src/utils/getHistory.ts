@@ -1,15 +1,15 @@
 export function updateHistory(service: string, value: number) {
-  const key = `history-${service}`
+	const key = `history-${service}`;
 
-  const stored = localStorage.getItem(key)
+	const stored = localStorage.getItem(key);
 
-  const history = stored ? JSON.parse(stored) : []
+	const history = stored ? JSON.parse(stored) : [];
 
-  history.push(value)
+	history.push(value);
 
-  if (history.length > 30) history.shift()
+	if (history.length > 30) history.shift();
 
-  localStorage.setItem(key, JSON.stringify(history))
+	localStorage.setItem(key, JSON.stringify(history));
 
-  return history
+	return history;
 }

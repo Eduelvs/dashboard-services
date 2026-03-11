@@ -1,14 +1,14 @@
 import LiquidGlass from "@nkzw/liquid-glass";
 import {
-    CategoryScale,
-    Chart as ChartJS,
-    Filler,
-    Legend,
-    LinearScale,
-    LineElement,
-    PointElement,
-    Title,
-    Tooltip,
+  CategoryScale,
+  Chart as ChartJS,
+  Filler,
+  Legend,
+  LinearScale,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
 } from "chart.js";
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import { Line } from "react-chartjs-2";
