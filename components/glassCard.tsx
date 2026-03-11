@@ -52,7 +52,6 @@ function GlassCard({ name, status, top, left, uptime, latency, lastUpdated, hist
   }, []);
 
   const isHealthy = status?.toLowerCase() === "operational" || status?.toLowerCase() === "ok" || status?.toLowerCase() === "up";
-  //traduzir status para português
   const statusTranslation = {
     "operational": "Operacional",
     "ok": "OK",
@@ -65,7 +64,7 @@ function GlassCard({ name, status, top, left, uptime, latency, lastUpdated, hist
   const liquidGlass = (
     <LiquidGlass
       mouseContainer={containerRef}
-      elasticity={0.3}
+      elasticity={0}
       displacementScale={28}
       aberrationIntensity={1}
       borderRadius={24}
