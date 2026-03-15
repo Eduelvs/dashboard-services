@@ -1,29 +1,107 @@
 import { AnimatePresence, motion } from "framer-motion";
+import type { ReactNode } from "react";
 import { useRef, useState } from "react";
 import { FaAws, FaDocker, FaGithub, FaStripe } from "react-icons/fa";
 import { HiOutlineViewGrid, HiOutlineViewList } from "react-icons/hi";
+import {
+	SiCloudflare,
+	SiDatadog,
+	SiFirebase,
+	SiGooglecloud,
+	SiRailway,
+	SiVercel,
+} from "react-icons/si";
 import { GlassButton, GlassCard } from "../components";
-import { useAwsStatusQuery } from "./services/queries/aws.query";
-import { useDockerStatusQuery } from "./services/queries/docker.query";
-import { useGithubStatusQuery } from "./services/queries/github.query";
-import { useStripeStatusQuery } from "./services/queries/stripe.query";
+import {
+	useAwsStatusQuery,
+	useCloudflareStatusQuery,
+	useDatadogStatusQuery,
+	useDockerStatusQuery,
+	useFirebaseStatusQuery,
+	useGcpStatusQuery,
+	useGithubStatusQuery,
+	useRailwayStatusQuery,
+	useStripeStatusQuery,
+	useVercelStatusQuery,
+} from "./services/queries";
 
 type ViewMode = "grid" | "line";
+
+type StatusData = {
+	status: string;
+	uptime: number | string;
+	latency: number;
+	lastUpdated: string;
+	history: number[] | Record<string, number>;
+};
+
+function toHistoryRecord(
+	history: number[] | Record<string, number> | undefined,
+): Record<string, number> {
+	if (history == null) return {};
+	if (Array.isArray(history))
+		return Object.fromEntries(history.map((v, i) => [String(i), v]));
+	return history;
+}
+
+const iconMap: Record<string, ReactNode> = {
+	github: <FaGithub size={24} />,
+	aws: <FaAws size={24} />,
+	stripe: <FaStripe size={24} />,
+	docker: <FaDocker size={24} />,
+	vercel: <SiVercel size={24} />,
+	railway: <SiRailway size={24} />,
+	cloudflare: <SiCloudflare size={24} />,
+	datadog: <SiDatadog size={24} />,
+	firebase: <SiFirebase size={24} />,
+	gcp: <SiGooglecloud size={24} />,
+};
 
 export default function App() {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const [isGrid, setIsGrid] = useState(true);
 	const [viewMode, setViewMode] = useState<ViewMode>("grid");
-	const { data } = useGithubStatusQuery();
+
+	const { data: githubStatus } = useGithubStatusQuery();
 	const { data: awsStatus } = useAwsStatusQuery();
 	const { data: stripeStatus } = useStripeStatusQuery();
 	const { data: dockerStatus } = useDockerStatusQuery();
+	const { data: vercelStatus } = useVercelStatusQuery();
+	const { data: railwayStatus } = useRailwayStatusQuery();
+	const { data: cloudflareStatus } = useCloudflareStatusQuery();
+	const { data: datadogStatus } = useDatadogStatusQuery();
+	const { data: firebaseStatus } = useFirebaseStatusQuery();
+	const { data: gcpStatus } = useGcpStatusQuery();
 
-	const iconMap = {
-		github: <FaGithub size={24} />,
-		aws: <FaAws size={24} />,
-		stripe: <FaStripe size={24} />,
-		docker: <FaDocker size={24} />,
+	const services: { key: string; name: string; data: StatusData | undefined }[] =
+		[
+			{ key: "github", name: githubStatus?.platform ?? "GitHub", data: githubStatus},
+			{ key: "aws", name: "Amazon Web", data: awsStatus },
+			{ key: "stripe", name: "Stripe", data: stripeStatus },
+			{ key: "docker", name: "Docker", data: dockerStatus },
+			{ key: "vercel", name: "Vercel", data: vercelStatus },
+			{ key: "railway", name: "Railway", data: railwayStatus },
+			{ key: "cloudflare", name: "Cloudflare", data: cloudflareStatus },
+			{ key: "datadog", name: "Datadog", data: datadogStatus },
+			{ key: "firebase", name: "Firebase", data: firebaseStatus },
+			{ key: "gcp", name: "Google Cloud", data: gcpStatus },
+		];
+
+	const cols = 5;
+	const visibleServices = isGrid ? services : services.slice(0, 5);
+	const getPosition = (index: number) => {
+		if (isGrid) {
+			const row = Math.floor(index / cols);
+			const col = index % cols;
+			return {
+				top: row === 0 ? 35 : 75,
+				left: 11 + col * 19,
+			};
+		}
+		return {
+			top: 50,
+			left: 11 + index * 19,
+		};
 	};
 
 	return (
@@ -37,118 +115,36 @@ export default function App() {
 				className="absolute inset-0 w-full h-full object-cover object-center z-0"
 			/>
 
-			<GlassCard
-				name={data?.platform ?? ""}
-				status={data?.status ?? ""}
-				top={30 + (isGrid ? 0 : 20)}
-				left={15 + (isGrid ? 0 : 5)}
-				uptime={data?.uptime ?? 0}
-				latency={data?.latency ?? 0}
-				lastUpdated={data?.lastUpdated ?? ""}
-				history={data?.history ?? []}
-				mouseContainerRef={containerRef}
-				icon={iconMap[data?.platform?.toLowerCase() as keyof typeof iconMap]}
-			/>
-			<GlassCard
-				name="Amazon Web"
-				status={awsStatus?.status ?? ""}
-				top={30 + (isGrid ? 0 : 20)}
-				left={35 + (isGrid ? 0 : 5)}
-				uptime={awsStatus?.uptime ?? 0}
-				latency={awsStatus?.latency ?? 0}
-				lastUpdated={awsStatus?.lastUpdated ?? ""}
-				history={awsStatus?.history ?? []}
-				mouseContainerRef={containerRef}
-				icon={iconMap["aws"]}
-			/>
-			<GlassCard
-				name="Stripe"
-				status={stripeStatus?.status ?? ""}
-				top={30 + (isGrid ? 0 : 20)}
-				left={55 + (isGrid ? 0 : 5)}
-				uptime={stripeStatus?.uptime ?? 0}
-				latency={stripeStatus?.latency ?? 0}
-				lastUpdated={stripeStatus?.lastUpdated ?? ""}
-				history={stripeStatus?.history ?? []}
-				mouseContainerRef={containerRef}
-				icon={iconMap["stripe"]}
-			/>
-			<GlassCard
-				name="Docker"
-				status={dockerStatus?.status ?? ""}
-				top={30 + (isGrid ? 0 : 20)}
-				left={75 + (isGrid ? 0 : 5)}
-				uptime={dockerStatus?.uptime ?? 0}
-				latency={dockerStatus?.latency ?? 0}
-				lastUpdated={dockerStatus?.lastUpdated ?? ""}
-				history={dockerStatus?.history ?? []}
-				mouseContainerRef={containerRef}
-				icon={iconMap["docker"]}
-			/>
-			{viewMode === "grid" ? (
-				<AnimatePresence mode="sync">
-					<motion.div
-						key="grid"
-						initial={{ opacity: 1, y: 40, scale: 0.95 }}
-						animate={{ opacity: 1, y: 0, scale: 1 }}
-						exit={{ opacity: 1, y: -20, scale: 0.95 }}
-						transition={{ duration: 1.5, ease: [0.4, 0, 0.2, 1] }}
-						className="absolute inset-0"
-					>
-						<GlassCard
-							name={data?.platform ?? ""}
-							status={data?.status ?? ""}
-							top={70}
-							left={15}
-							uptime={data?.uptime ?? 0}
-							latency={data?.latency ?? 0}
-							lastUpdated={data?.lastUpdated ?? ""}
-							history={data?.history ?? []}
-							mouseContainerRef={containerRef}
-							icon={
-								iconMap[data?.platform?.toLowerCase() as keyof typeof iconMap]
-							}
-						/>
-						<GlassCard
-							name="Amazon Web"
-							status={awsStatus?.status ?? ""}
-							top={70}
-							left={35}
-							uptime={awsStatus?.uptime ?? 0}
-							latency={awsStatus?.latency ?? 0}
-							lastUpdated={awsStatus?.lastUpdated ?? ""}
-							history={awsStatus?.history ?? []}
-							mouseContainerRef={containerRef}
-							icon={iconMap["aws"]}
-						/>
-						<GlassCard
-							name="Stripe"
-							status={stripeStatus?.status ?? ""}
-							top={70}
-							left={55}
-							uptime={stripeStatus?.uptime ?? 0}
-							latency={stripeStatus?.latency ?? 0}
-							lastUpdated={stripeStatus?.lastUpdated ?? ""}
-							history={stripeStatus?.history ?? []}
-							mouseContainerRef={containerRef}
-							icon={iconMap["stripe"]}
-						/>
-						<GlassCard
-							name="Docker"
-							status={dockerStatus?.status ?? ""}
-							top={70}
-							left={75}
-							uptime={dockerStatus?.uptime ?? 0}
-							latency={dockerStatus?.latency ?? 0}
-							lastUpdated={dockerStatus?.lastUpdated ?? ""}
-							history={dockerStatus?.history ?? []}
-							mouseContainerRef={containerRef}
-							icon={iconMap["docker"]}
-						/>
-					</motion.div>
-				</AnimatePresence>
-			) : null}
-			<GlassButton top={10} left={93}>
+			<AnimatePresence mode="wait">
+				<motion.div
+					key={viewMode}
+					initial={{ opacity: 0.8, scale: 0.98 }}
+					animate={{ opacity: 1, scale: 1 }}
+					exit={{ opacity: 0.8, scale: 0.98 }}
+					transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+					className="absolute inset-0"
+				>
+					{visibleServices.map((svc, index) => {
+						const pos = getPosition(index);
+						return (
+							<GlassCard
+								key={svc.key}
+								name={svc.name}
+								status={svc.data?.status ?? ""}
+								top={pos.top}
+								left={pos.left}
+								uptime={svc.data?.uptime ?? 0}
+								latency={svc.data?.latency ?? 0}
+								lastUpdated={svc.data?.lastUpdated ?? ""}
+								history={toHistoryRecord(svc.data?.history)}
+								mouseContainerRef={containerRef}
+								icon={iconMap[svc.key]}
+							/>
+						);
+					})}
+				</motion.div>
+			</AnimatePresence>
+			<GlassButton top={7} left={50}>
 				<div className="relative flex items-center gap-1 p-0.5 rounded-full bg-transparent">
 					<button
 						type="button"
